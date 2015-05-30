@@ -564,6 +564,24 @@
         var anisotropy, ext = gl.getExtension("EXT_texture_filter_anisotropic") || gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic") || gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
         return ext ? (anisotropy = gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT), 0 === anisotropy && (anisotropy = 2), anisotropy) : null;
       };
+      var checkRenderTargetSupport = function ( gl, format, type ) {
+        // from http://alteredqualia.com/tmp/webgl-maxparams-test/
+        // create temporary frame buffer and texture
+        var framebuffer = gl.createFramebuffer();
+        var texture = gl.createTexture();
+        gl.bindTexture( gl.TEXTURE_2D, texture );
+        gl.texImage2D( gl.TEXTURE_2D, 0, format, 2, 2, 0, format, type, null );
+        gl.bindFramebuffer( gl.FRAMEBUFFER, framebuffer );
+        gl.framebufferTexture2D( gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0 );
+        // check frame buffer status
+        // todo: WebGL: checkFramebufferStatus: the internalformat of the attached texture is not color-renderable
+        var status = gl.checkFramebufferStatus( gl.FRAMEBUFFER );
+        // clean up
+        gl.bindFramebuffer( gl.FRAMEBUFFER, null );
+        gl.bindTexture( gl.TEXTURE_2D, null );
+        //
+        return status === gl.FRAMEBUFFER_COMPLETE;
+      };
       gl = this.getWebglCanvas();
       if(!gl) { return null; }
       // WebGL fingerprinting is a combination of techniques, found in MaxMind antifraud script & Augur fingerprinting.
@@ -661,6 +679,40 @@
       result.push("webgl fragment shader low int precision:" + gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.LOW_INT ).precision);
       result.push("webgl fragment shader low int precision rangeMin:" + gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.LOW_INT ).rangeMin);
       result.push("webgl fragment shader low int precision rangeMax:" + gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.LOW_INT ).rangeMax);
+      
+
+      var glExtensionTextureFloat = gl.getExtension( 'OES_texture_float' );
+      var glExtensionTextureHalfFloat = gl.getExtension( 'OES_texture_half_float' );
+
+      if(glExtensionTextureFloat) {
+        result.push("webgl unsigned byte render target formats:" +
+          (checkRenderTargetSupport( gl, gl.RGBA, gl.UNSIGNED_BYTE )  ? 'RGBA' : '') +
+          (checkRenderTargetSupport( gl, gl.RGB, gl.UNSIGNED_BYTE ) ? ',RGB' : '') +
+          (checkRenderTargetSupport( gl, gl.LUMINANCE, gl.UNSIGNED_BYTE ) ? ',LUMINANCE' : '') +
+          (checkRenderTargetSupport( gl, gl.ALPHA, gl.UNSIGNED_BYTE ) ? ',ALPHA' : '' ) +
+          (checkRenderTargetSupport( gl, gl.LUMINANCE_ALPHA, gl.UNSIGNED_BYTE ) ? ',LUMINANCE_ALPHA' : '')
+        );
+        if(glExtensionTextureHalfFloat) {
+          result.push("webgl half float render target formats:" +
+            checkRenderTargetSupport( gl, gl.RGBA, glExtensionTextureHalfFloat.HALF_FLOAT_OES )  ? 'RGBA' : '' +
+            checkRenderTargetSupport( gl, gl.RGB, glExtensionTextureHalfFloat.HALF_FLOAT_OES ) ? 'RGB' : '' +
+            checkRenderTargetSupport( gl, gl.LUMINANCE, glExtensionTextureHalfFloat.HALF_FLOAT_OES ) ? 'LUMINANCE' : ''  +
+            checkRenderTargetSupport( gl, gl.ALPHA, glExtensionTextureHalfFloat.HALF_FLOAT_OES ) ? 'ALPHA' : '' +
+            checkRenderTargetSupport( gl, gl.LUMINANCE_ALPHA, glExtensionTextureHalfFloat.HALF_FLOAT_OES ) ? 'LUMINANCE_ALPHA' : ''
+          );
+        }
+        if(glExtensionTextureFloat) {
+          result.push("webgl full float render target formats:" +
+            checkRenderTargetSupport( gl, gl.RGB, gl.FLOAT ) ? 'RGB' : ''  +
+            checkRenderTargetSupport( gl, gl.LUMINANCE, gl.FLOAT ) ? 'LUMINANCE' : '' +
+            checkRenderTargetSupport( gl, gl.ALPHA, gl.FLOAT ) ? 'ALPHA' : '' +
+            checkRenderTargetSupport( gl, gl.LUMINANCE_ALPHA, gl.FLOAT ) ? 'LUMINANCE_ALPHA' : ''
+          );
+        }
+        
+      }
+      
+
       return result.join("§");
     },
     isCanvasSupported: function () {

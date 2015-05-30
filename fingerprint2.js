@@ -620,6 +620,9 @@
       result.push("webgl renderer:" + gl.getParameter(gl.RENDERER));
       result.push("webgl shading language version:" + gl.getParameter(gl.SHADING_LANGUAGE_VERSION));
       result.push("webgl stencil bits:" + gl.getParameter(gl.STENCIL_BITS));
+      result.push("webgl subpixel bits:" + gl.getParameter(gl.SUBPIXEL_BITS));
+      result.push("webgl MSAA samples:" + gl.getParameter(gl.SAMPLES));
+      result.push("webgl MSAA sample buffers:" + gl.getParameter(gl.SAMPLE_BUFFERS));
       result.push("webgl vendor:" + gl.getParameter(gl.VENDOR));
       result.push("webgl version:" + gl.getParameter(gl.VERSION));
       result.push("webgl vertex shader high float precision:" + gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.HIGH_FLOAT ).precision);

@@ -47,6 +47,7 @@
         console.log(msg);
       }
     },
+    fpKeys: {},
     get: function(done){
       var keys = [];
       keys = this.userAgentKey(keys);
@@ -75,18 +76,21 @@
     userAgentKey: function(keys) {
       if(!this.options.excludeUserAgent) {
         keys.push(navigator.userAgent);
+        this.fpKeys.userAgentKey = navigator.userAgent;
       }
       return keys;
     },
     languageKey: function(keys) {
       if(!this.options.excludeLanguage) {
         keys.push(navigator.language);
+        this.fpKeys.languageKey = navigator.language;
       }
       return keys;
     },
     colorDepthKey: function(keys) {
       if(!this.options.excludeColorDepth) {
         keys.push(screen.colorDepth);
+        this.fpKeys.colorDepthKey = screen.colorDepth;
       }
       return keys;
     },
@@ -94,7 +98,9 @@
       if(!this.options.excludeScreenResolution) {
         var resolution = this.getScreenResolution();
         if (typeof resolution !== "undefined"){ // headless browsers, such as phantomjs
-          keys.push(resolution.join("x"));
+          var res = resolution.join("x");
+          keys.push();
+          this.fpKeys.screenResolutionKey = res;
         }
       }
       return keys;
@@ -110,25 +116,30 @@
     },
     timezoneOffsetKey: function(keys) {
       if(!this.options.excludeTimezoneOffset) {
-        keys.push(new Date().getTimezoneOffset());
+        var fpDate = new Date().getTimezoneOffset();
+        keys.push(fpDate);
+        this.fpKeys.timezoneOffsetKey = fpDate;
       }
       return keys;
     },
     sessionStorageKey: function(keys) {
       if(!this.options.excludeSessionStorage && this.hasSessionStorage()) {
         keys.push("sessionStorageKey");
+        this.fpKeys.sessionStorageKey = "sessionStorageKey";
       }
       return keys;
     },
     localStorageKey: function(keys) {
       if(!this.options.excludeSessionStorage && this.hasLocalStorage()) {
         keys.push("localStorageKey");
+        this.fpKeys.localStorageKey = "localStorageKey";
       }
       return keys;
     },
     indexedDbKey: function(keys) {
       if(!this.options.excludeIndexedDB && this.hasIndexedDB()) {
         keys.push("indexedDbKey");
+        this.fpKeys.indexedDbKey = "indexedDbKey";
       }
       return keys;
     },
@@ -136,42 +147,54 @@
       //body might not be defined at this point or removed programmatically
       if(document.body && !this.options.excludeAddBehavior && document.body.addBehavior) {
         keys.push("addBehaviorKey");
+        this.fpKeys.addBehaviorKey = "addBehaviorKey";
       }
       return keys;
     },
     openDatabaseKey: function(keys) {
       if(!this.options.excludeOpenDatabase && window.openDatabase) {
         keys.push("openDatabase");
+        this.fpKeys.openDatabase = "openDatabase";
       }
       return keys;
     },
     cpuClassKey: function(keys) {
       if(!this.options.excludeCpuClass) {
-        keys.push(this.getNavigatorCpuClass());
+        var nav = this.getNavigatorCpuClass()
+        keys.push(nav);
+        this.fpKeys.cpuClassKey = nav;
       }
       return keys;
     },
     platformKey: function(keys) {
       if(!this.options.excludePlatform) {
-        keys.push(this.getNavigatorPlatform());
+        var platform = this.getNavigatorPlatform()
+        keys.push(platform);
+        this.fpKeys.platformKey = platform;
       }
       return keys;
     },
     doNotTrackKey: function(keys) {
       if(!this.options.excludeDoNotTrack) {
-        keys.push(this.getDoNotTrack());
+        var dnt = this.getDoNotTrack();
+        keys.push(dnt);
+        this.fpKeys.doNotTrackKey = dnt;
       }
       return keys;
     },
     canvasKey: function(keys) {
       if(!this.options.excludeCanvas && this.isCanvasSupported()) {
-        keys.push(this.getCanvasFp());
+        var fp = this.getCanvasFp();
+        keys.push(fp);
+        this.fpKeys.canvasKey = fp;
       }
       return keys;
     },
     webglKey: function(keys) {
       if(!this.options.excludeWebGL && this.isCanvasSupported()) {
-        keys.push(this.getWebglFp());
+        var wgl = this.getWebglFp();
+        keys.push(wgl);
+        this.fpKeys.webglKey = wgl;
       }
       return keys;
     },
@@ -212,7 +235,9 @@
     // flash fonts (will increase fingerprinting time 20X to ~ 130-150ms)
     flashFontsKey: function(keys, done) {
       this.loadSwfAndDetectFonts(function(fonts){
-        keys.push(fonts.join(";"));
+        var joinedFonts = fonts.join(";")
+        keys.push(joinedFonts);
+        this.fpKeys.flashFontsKey = joinedFonts;
         done(keys);
       });
     },
@@ -392,9 +417,13 @@
     },
     pluginsKey: function(keys) {
       if(this.isIE()){
-        keys.push(this.getIEPluginsString());
+        var ie = this.getIEPluginsString();
+        keys.push(ie);
+        this.fpKeys.pluginsKey = ie;
       } else {
-        keys.push(this.getRegularPluginsString());
+        var notIE = this.getRegularPluginsString();
+        keys.push(notIE);
+        this.fpKeys.pluginsKey = notIE;
       }
       return keys;
     },

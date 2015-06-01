@@ -99,7 +99,7 @@
         var resolution = this.getScreenResolution();
         if (typeof resolution !== "undefined"){ // headless browsers, such as phantomjs
           var res = resolution.join("x");
-          keys.push();
+          keys.push(res);
           this.fpKeys.screenResolutionKey = res;
         }
       }

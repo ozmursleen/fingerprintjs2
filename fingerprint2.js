@@ -234,10 +234,11 @@
     },
     // flash fonts (will increase fingerprinting time 20X to ~ 130-150ms)
     flashFontsKey: function(keys, done) {
+      var that = this;
       this.loadSwfAndDetectFonts(function(fonts){
-        var joinedFonts = fonts.join(";")
+        var joinedFonts = fonts.join(";");
         keys.push(joinedFonts);
-        this.fpKeys.flashFontsKey = joinedFonts;
+        that.fpKeys.flashFontsKey = joinedFonts;
         done(keys);
       });
     },
